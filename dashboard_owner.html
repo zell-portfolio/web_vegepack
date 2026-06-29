@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VEGEPACK - Dashboard Owner</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2d8a4e;
+        --primary-dark: #1a6b35;
+        --primary-light: #e8f5e9;
+        --white: #ffffff;
+        --gray: #f8faf8;
+        --gray-border: #e0e8e0;
+        --text: #2c3e2c;
+        --text-light: #6b7b6b;
+        --danger: #e53935;
+        --warning: #ff9800;
+        --success: #43a047;
+        --info: #1976d2;
+        --gold: #f9a825;
+        --shadow: 0 4px 20px rgba(45, 138, 78, 0.1);
+        --shadow-lg: 0 8px 30px rgba(45, 138, 78, 0.15);
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--gray);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 260px;
+        height: 100vh;
+        background: linear-gradient(
+          180deg,
+          #1a1a2e 0%,
+          #16213e 50%,
+          #0f3460 100%
+        );
+        color: white;
+        z-index: 1000;
+        overflow-y: auto;
+        transition: transform 0.3s;
+      }
+
+      .sidebar-header {
+        padding: 25px 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+      }
+      .sidebar-header .logo span {
+        color: #66bb6a;
+      }
+      .sidebar-header .role-badge {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 4px 12px;
+        background: linear-gradient(135deg, #f9a825, #f57f17);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        color: white;
+        font-weight: 700;
+      }
+
+      .nav-menu {
+        padding: 15px 0;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 25px;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+      }
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+      }
+      .nav-item.active {
+        background: rgba(102, 187, 106, 0.15);
+        color: #66bb6a;
+        border-left-color: #66bb6a;
+      }
+      .nav-item .nav-icon {
+        margin-right: 12px;
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+      }
+      .nav-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 10px 20px;
+      }
+      .nav-item.logout {
+        color: #ef5350;
+      }
+
+      .main-content {
+        margin-left: 260px;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        background: white;
+        padding: 18px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary);
+      }
+      .topbar-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .owner-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f9a825, #f57f17);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .page-content {
+        padding: 30px;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+        animation: fadeIn 0.4s;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Revenue Cards */
+      .revenue-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .revenue-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+      .revenue-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+      }
+      .revenue-card.green::before {
+        background: linear-gradient(90deg, #43a047, #66bb6a);
+      }
+      .revenue-card.blue::before {
+        background: linear-gradient(90deg, #1976d2, #42a5f5);
+      }
+      .revenue-card.orange::before {
+        background: linear-gradient(90deg, #ff9800, #ffb74d);
+      }
+      .revenue-card.purple::before {
+        background: linear-gradient(90deg, #7b1fa2, #ab47bc);
+      }
+      .revenue-card.red::before {
+        background: linear-gradient(90deg, #e53935, #ef5350);
+      }
+
+      .revenue-card .rev-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+      }
+      .revenue-card.green .rev-icon {
+        background: #e8f5e9;
+      }
+      .revenue-card.blue .rev-icon {
+        background: #e3f2fd;
+      }
+      .revenue-card.orange .rev-icon {
+        background: #fff3e0;
+      }
+      .revenue-card.purple .rev-icon {
+        background: #f3e5f5;
+      }
+      .revenue-card.red .rev-icon {
+        background: #ffebee;
+      }
+
+      .revenue-card .rev-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-bottom: 5px;
+      }
+      .revenue-card .rev-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .revenue-card .rev-change {
+        font-size: 0.8rem;
+        margin-top: 8px;
+        font-weight: 600;
+      }
+      .rev-change.up {
+        color: var(--success);
+      }
+      .rev-change.down {
+        color: var(--danger);
+      }
+
+      /* Chart Container */
+      .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .chart-header h3 {
+        font-size: 1.1rem;
+        color: var(--primary-dark);
+      }
+
+      .chart-filter {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .filter-btn {
+        padding: 6px 14px;
+        border: 2px solid var(--gray-border);
+        border-radius: 8px;
+        background: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .filter-btn.active {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary-dark);
+      }
+
+      /* Bar Chart */
+      .bar-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        height: 250px;
+        padding: 20px 0;
+        border-bottom: 2px solid var(--gray-border);
+      }
+      .bar-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .bar {
+        width: 100%;
+        max-width: 50px;
+        border-radius: 8px 8px 0 0;
+        background: linear-gradient(
+          180deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        transition: all 0.3s;
+        min-height: 10px;
+      }
+      .bar:hover {
+        opacity: 0.8;
+      }
+      .bar-value {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .bar-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      /* Donut Chart */
+      .donut-container {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+      .donut-chart {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .donut-center {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .donut-center .dc-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+      }
+      .donut-center .dc-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+      }
+      .donut-legend {
+        flex: 1;
+        min-width: 200px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+      }
+      .legend-color {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+      }
+      .legend-label {
+        font-size: 0.9rem;
+        flex: 1;
+      }
+      .legend-value {
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      /* Stock Table */
+      .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .stock-table th {
+        text-align: left;
+        padding: 12px 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--gray-border);
+      }
+      .stock-table td {
+        padding: 14px 15px;
+        border-bottom: 1px solid var(--gray-border);
+        font-size: 0.9rem;
+      }
+      .stock-table tr:hover td {
+        background: #f1f8e9;
+      }
+
+      .stock-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--gray-border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 5px;
+      }
+      .stock-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s;
+      }
+      .stock-bar-fill.high {
+        background: var(--success);
+      }
+      .stock-bar-fill.medium {
+        background: var(--warning);
+      }
+      .stock-bar-fill.low {
+        background: var(--danger);
+      }
+
+      .restock-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .restock-urgent {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .restock-soon {
+        background: #fff3e0;
+        color: #e65100;
+      }
+      .restock-ok {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      /* Report Section */
+      .report-section {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+      }
+
+      .report-section h3 {
+        font-size: 1.1rem;
+        color: var(--primary-dark);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .period-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 15px;
+        align-items: end;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: var(--gray);
+        border-radius: 12px;
+      }
+
+      .period-selector .form-group {
+        margin-bottom: 0;
+      }
+      .period-selector label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--text);
+      }
+      .period-selector input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid var(--gray-border);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-family: inherit;
+      }
+      .period-selector input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(45, 138, 78, 0.1);
+      }
+
+      .btn-generate {
+        padding: 12px 24px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+      .btn-generate:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .btn-print {
+        padding: 12px 24px;
+        background: var(--info);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+      }
+      .btn-print:hover {
+        background: #0d47a1;
+        transform: translateY(-2px);
+      }
+
+      .report-header-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: var(--primary-light);
+        border-radius: 12px;
+      }
+
+      .report-header-info .info-item .label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-bottom: 4px;
+      }
+      .report-header-info .info-item .value {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--primary-dark);
+      }
+
+      .report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .report-card {
+        background: var(--gray);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .report-card h4 {
+        font-size: 1rem;
+        color: var(--primary-dark);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .report-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--gray-border);
+        font-size: 0.9rem;
+      }
+      .report-item:last-child {
+        border-bottom: none;
+      }
+      .report-item .ri-label {
+        color: var(--text-light);
+      }
+      .report-item .ri-value {
+        font-weight: 700;
+      }
+      .report-item.total {
+        border-top: 2px solid var(--primary);
+        padding-top: 12px;
+        margin-top: 5px;
+        font-weight: 700;
+      }
+      .report-item.total .ri-value {
+        color: var(--primary-dark);
+        font-size: 1.05rem;
+      }
+      .report-item.profit .ri-value {
+        color: var(--success);
+      }
+      .report-item.loss .ri-value {
+        color: var(--danger);
+      }
+
+      .empty-report {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-light);
+      }
+      .empty-report .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .menu-toggle {
+          display: block;
+        }
+        .page-content {
+          padding: 20px 15px;
+        }
+        .revenue-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .bar-chart {
+          height: 180px;
+        }
+        .donut-container {
+          flex-direction: column;
+        }
+        .period-selector {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 480px) {
+        .revenue-grid {
+          grid-template-columns: 1fr;
+        }
+        .report-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 999;
+      }
+      .sidebar-overlay.show {
+        display: block;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--primary-dark);
+        color: white;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-lg);
+        z-index: 3000;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      /* Print Styles */
+      @media print {
+        body {
+          background: white;
+        }
+        .sidebar,
+        .topbar,
+        .nav-menu,
+        .btn-generate,
+        .btn-print,
+        .period-selector,
+        .no-print {
+          display: none !important;
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .page-content {
+          padding: 0;
+        }
+        .page {
+          display: block !important;
+        }
+        .page:not(#page-laporan) {
+          display: none !important;
+        }
+        .chart-container,
+        .report-section,
+        .revenue-card {
+          box-shadow: none;
+          border: 1px solid #ddd;
+          break-inside: avoid;
+        }
+        .report-section {
+          page-break-inside: avoid;
+        }
+      }
+
+      .print-header {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        border-bottom: 3px solid var(--primary);
+        margin-bottom: 20px;
+      }
+      .print-header h1 {
+        color: var(--primary-dark);
+        font-size: 1.8rem;
+      }
+      .print-header p {
+        color: var(--text-light);
+        margin-top: 5px;
+      }
+
+      @media print {
+        .print-header {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="toggleSidebar()"
+    ></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">VEGE<span>PACK</span></div>
+        <div class="role-badge">👑 OWNER PANEL</div>
+      </div>
+      <nav class="nav-menu">
+        <div
+          class="nav-item active"
+          onclick="showPage('dashboard')"
+          data-page="dashboard"
+        >
+          <span class="nav-icon"></span> Dashboard
+        </div>
+        <div
+          class="nav-item"
+          onclick="showPage('pendapatan')"
+          data-page="pendapatan"
+        >
+          <span class="nav-icon">💰</span> Pendapatan
+        </div>
+        <div
+          class="nav-item"
+          onclick="showPage('labarugi')"
+          data-page="labarugi"
+        >
+          <span class="nav-icon">📈</span> Laba Rugi
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-item" onclick="showPage('stok')" data-page="stok">
+          <span class="nav-icon">📦</span> Evaluasi Stok
+        </div>
+        <div class="nav-item" onclick="showPage('restock')" data-page="restock">
+          <span class="nav-icon">🔄</span> Rekomendasi Restock
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-item" onclick="showPage('laporan')" data-page="laporan">
+          <span class="nav-icon"></span> Laporan Penjualan
+        </div>
+        <div class="nav-item logout" onclick="handleLogout()">
+          <span class="nav-icon">🚪</span> Keluar
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+          <div class="topbar-title" id="pageTitle">Dashboard Owner</div>
+        </div>
+        <div class="topbar-right">
+          <div class="owner-avatar">👑</div>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <!-- Print Header (hanya muncul saat print) -->
+        <div class="print-header">
+          <h1>VEGEPACK</h1>
+          <p>Laporan Penjualan & Laba Rugi</p>
+          <p id="printPeriod" style="font-weight: 700; margin-top: 10px"></p>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div class="page active" id="page-dashboard">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            👑 Dashboard Owner
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Ringkasan bisnis VEGEPACK hari ini
+          </p>
+
+          <div class="revenue-grid">
+            <div class="revenue-card green">
+              <div class="rev-icon"></div>
+              <div class="rev-label">Pendapatan Hari Ini</div>
+              <div class="rev-value">Rp 2.450.000</div>
+              <div class="rev-change up">↑ 15% dari kemarin</div>
+            </div>
+            <div class="revenue-card blue">
+              <div class="rev-icon">📦</div>
+              <div class="rev-label">Total Pesanan</div>
+              <div class="rev-value">78</div>
+              <div class="rev-change up">↑ 8% dari kemarin</div>
+            </div>
+            <div class="revenue-card orange">
+              <div class="rev-icon"></div>
+              <div class="rev-label">Laba Bersih</div>
+              <div class="rev-value">Rp 890.000</div>
+              <div class="rev-change up">↑ 12% dari kemarin</div>
+            </div>
+            <div class="revenue-card purple">
+              <div class="rev-icon">👥</div>
+              <div class="rev-label">Pelanggan Baru</div>
+              <div class="rev-value">12</div>
+              <div class="rev-change up">↑ 20% dari kemarin</div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3>📊 Grafik Penjualan Mingguan</h3>
+              <div class="chart-filter">
+                <button class="filter-btn active">Minggu Ini</button>
+                <button class="filter-btn">Bulan Ini</button>
+                <button class="filter-btn">Tahun Ini</button>
+              </div>
+            </div>
+            <div class="bar-chart">
+              <div class="bar-item">
+                <div class="bar-value">1.8jt</div>
+                <div class="bar" style="height: 72%"></div>
+                <div class="bar-label">Sen</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">2.1jt</div>
+                <div class="bar" style="height: 84%"></div>
+                <div class="bar-label">Sel</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">1.5jt</div>
+                <div class="bar" style="height: 60%"></div>
+                <div class="bar-label">Rab</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">2.4jt</div>
+                <div class="bar" style="height: 96%"></div>
+                <div class="bar-label">Kam</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">2.0jt</div>
+                <div class="bar" style="height: 80%"></div>
+                <div class="bar-label">Jum</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">2.8jt</div>
+                <div
+                  class="bar"
+                  style="
+                    height: 100%;
+                    background: linear-gradient(180deg, #f9a825, #f57f17);
+                  "
+                ></div>
+                <div class="bar-label">Sab</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">2.4jt</div>
+                <div class="bar" style="height: 96%"></div>
+                <div class="bar-label">Min</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div class="chart-container">
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  color: var(--primary-dark);
+                  margin-bottom: 15px;
+                "
+              >
+                🏆 Produk Terlaris
+              </h3>
+              <div class="report-item">
+                <span class="ri-label"> Bayam Segar</span
+                ><span class="ri-value">156 terjual</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">🍅 Tomat Merah</span
+                ><span class="ri-value">134 terjual</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">🥕 Wortel Baby</span
+                ><span class="ri-value">98 terjual</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label"> Paket Keluarga</span
+                ><span class="ri-value">87 terjual</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">🥦 Brokoli Organik</span
+                ><span class="ri-value">76 terjual</span>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  color: var(--primary-dark);
+                  margin-bottom: 15px;
+                "
+              >
+                📂 Distribusi Kategori
+              </h3>
+              <div class="donut-container">
+                <div
+                  class="donut-chart"
+                  style="
+                    background: conic-gradient(
+                      #2e7d32 0% 38%,
+                      #43a047 38% 60%,
+                      #66bb6a 60% 78%,
+                      #a5d6a7 78% 90%,
+                      #c8e6c9 90% 100%
+                    );
+                  "
+                >
+                  <div class="donut-center">
+                    <div class="dc-value">100%</div>
+                    <div class="dc-label">Total</div>
+                  </div>
+                </div>
+                <div class="donut-legend">
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #2e7d32"></div>
+                    <span class="legend-label">Sayur Daun</span
+                    ><span class="legend-value">38%</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #43a047"></div>
+                    <span class="legend-label">Sayur Buah</span
+                    ><span class="legend-value">22%</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #66bb6a"></div>
+                    <span class="legend-label">Umbi-umbian</span
+                    ><span class="legend-value">18%</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #a5d6a7"></div>
+                    <span class="legend-label">Bumbu Dapur</span
+                    ><span class="legend-value">12%</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #c8e6c9"></div>
+                    <span class="legend-label">Paket Hemat</span
+                    ><span class="legend-value">10%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pendapatan Page -->
+        <div class="page" id="page-pendapatan">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            💰 Pendapatan
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Analisis pendapatan bisnis Anda
+          </p>
+
+          <div class="revenue-grid">
+            <div class="revenue-card green">
+              <div class="rev-icon">💵</div>
+              <div class="rev-label">Pendapatan Hari Ini</div>
+              <div class="rev-value">Rp 2.450.000</div>
+              <div class="rev-change up">↑ 15%</div>
+            </div>
+            <div class="revenue-card blue">
+              <div class="rev-icon">📅</div>
+              <div class="rev-label">Pendapatan Minggu Ini</div>
+              <div class="rev-value">Rp 15.200.000</div>
+              <div class="rev-change up">↑ 12%</div>
+            </div>
+            <div class="revenue-card orange">
+              <div class="rev-icon">🗓️</div>
+              <div class="rev-label">Pendapatan Bulan Ini</div>
+              <div class="rev-value">Rp 58.700.000</div>
+              <div class="rev-change up">↑ 18%</div>
+            </div>
+            <div class="revenue-card purple">
+              <div class="rev-icon"></div>
+              <div class="rev-label">Rata-rata per Order</div>
+              <div class="rev-value">Rp 42.500</div>
+              <div class="rev-change up">↑ 5%</div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header"><h3>📈 Tren Pendapatan Bulanan</h3></div>
+            <div class="bar-chart">
+              <div class="bar-item">
+                <div class="bar-value">32jt</div>
+                <div class="bar" style="height: 55%"></div>
+                <div class="bar-label">Jan</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">38jt</div>
+                <div class="bar" style="height: 65%"></div>
+                <div class="bar-label">Feb</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">42jt</div>
+                <div class="bar" style="height: 72%"></div>
+                <div class="bar-label">Mar</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">45jt</div>
+                <div class="bar" style="height: 77%"></div>
+                <div class="bar-label">Apr</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">51jt</div>
+                <div class="bar" style="height: 87%"></div>
+                <div class="bar-label">Mei</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-value">58jt</div>
+                <div
+                  class="bar"
+                  style="
+                    height: 100%;
+                    background: linear-gradient(180deg, #f9a825, #f57f17);
+                  "
+                ></div>
+                <div class="bar-label">Jun</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Laba Rugi Page -->
+        <div class="page" id="page-labarugi">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            📈 Laporan Laba Rugi
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Analisis keuntungan bisnis bulan ini
+          </p>
+
+          <div class="revenue-grid">
+            <div class="revenue-card green">
+              <div class="rev-icon"></div>
+              <div class="rev-label">Total Pendapatan</div>
+              <div class="rev-value">Rp 58.700.000</div>
+            </div>
+            <div class="revenue-card orange">
+              <div class="rev-icon">💸</div>
+              <div class="rev-label">Total Pengeluaran</div>
+              <div class="rev-value">Rp 35.200.000</div>
+            </div>
+            <div class="revenue-card blue">
+              <div class="rev-icon">📈</div>
+              <div class="rev-label">Laba Bersih</div>
+              <div class="rev-value">Rp 23.500.000</div>
+              <div class="rev-change up">↑ Margin 40%</div>
+            </div>
+            <div class="revenue-card purple">
+              <div class="rev-icon">📊</div>
+              <div class="rev-label">Margin Keuntungan</div>
+              <div class="rev-value">40.0%</div>
+              <div class="rev-change up">↑ 3% dari bulan lalu</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div class="chart-container">
+              <h4 style="color: var(--primary-dark); margin-bottom: 15px">
+                📥 Rincian Pendapatan
+              </h4>
+              <div class="report-item">
+                <span class="ri-label">Penjualan Satuan</span
+                ><span class="ri-value">Rp 35.200.000</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">Penjualan Paket</span
+                ><span class="ri-value">Rp 18.500.000</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">Ongkos Kirim</span
+                ><span class="ri-value">Rp 5.000.000</span>
+              </div>
+              <div class="report-item total">
+                <span class="ri-label">Total Pendapatan</span
+                ><span class="ri-value" style="color: var(--success)"
+                  >Rp 58.700.000</span
+                >
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <h4 style="color: var(--primary-dark); margin-bottom: 15px">
+                📤 Rincian Pengeluaran
+              </h4>
+              <div class="report-item">
+                <span class="ri-label">Beli Sayur dari Petani</span
+                ><span class="ri-value">Rp 22.000.000</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">Gaji Karyawan</span
+                ><span class="ri-value">Rp 8.000.000</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">Biaya Operasional</span
+                ><span class="ri-value">Rp 3.200.000</span>
+              </div>
+              <div class="report-item">
+                <span class="ri-label">Biaya Pengiriman</span
+                ><span class="ri-value">Rp 2.000.000</span>
+              </div>
+              <div class="report-item total">
+                <span class="ri-label">Total Pengeluaran</span
+                ><span class="ri-value" style="color: var(--danger)"
+                  >Rp 35.200.000</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stok Page -->
+        <div class="page" id="page-stok">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            📦 Evaluasi Stok
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Pantau kondisi stok sayuran Anda
+          </p>
+
+          <div class="revenue-grid" style="margin-bottom: 25px">
+            <div class="revenue-card green">
+              <div class="rev-icon">✅</div>
+              <div class="rev-label">Stok Aman</div>
+              <div class="rev-value">8 Produk</div>
+            </div>
+            <div class="revenue-card orange">
+              <div class="rev-icon">️</div>
+              <div class="rev-label">Stok Menipis</div>
+              <div class="rev-value">3 Produk</div>
+            </div>
+            <div class="revenue-card blue">
+              <div class="rev-icon">🔄</div>
+              <div class="rev-label">Perlu Restock</div>
+              <div class="rev-value">2 Produk</div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <h3 style="color: var(--primary-dark); margin-bottom: 15px">
+              📊 Status Stok Semua Produk
+            </h3>
+            <div style="overflow-x: auto">
+              <table class="stock-table">
+                <thead>
+                  <tr>
+                    <th>Produk</th>
+                    <th>Stok Saat Ini</th>
+                    <th>Kapasitas</th>
+                    <th>Level Stok</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>🥬 Bayam Segar</strong></td>
+                    <td>50 ikat</td>
+                    <td>100 ikat</td>
+                    <td>
+                      <div class="stock-bar">
+                        <div
+                          class="stock-bar-fill high"
+                          style="width: 50%"
+                        ></div>
+                      </div>
+                    </td>
+                    <td><span class="restock-badge restock-ok">Aman</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>🥕 Wortel Baby</strong></td>
+                    <td>30 pack</td>
+                    <td>80 pack</td>
+                    <td>
+                      <div class="stock-bar">
+                        <div
+                          class="stock-bar-fill medium"
+                          style="width: 37%"
+                        ></div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="restock-badge restock-soon">Menipis</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>🍅 Tomat Merah</strong></td>
+                    <td>5 kg</td>
+                    <td>50 kg</td>
+                    <td>
+                      <div class="stock-bar">
+                        <div
+                          class="stock-bar-fill low"
+                          style="width: 10%"
+                        ></div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="restock-badge restock-urgent">Kritis!</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong> Brokoli Organik</strong></td>
+                    <td>25 buah</td>
+                    <td>60 buah</td>
+                    <td>
+                      <div class="stock-bar">
+                        <div
+                          class="stock-bar-fill high"
+                          style="width: 42%"
+                        ></div>
+                      </div>
+                    </td>
+                    <td><span class="restock-badge restock-ok">Aman</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>🥒 Timun Segar</strong></td>
+                    <td>8 kg</td>
+                    <td>40 kg</td>
+                    <td>
+                      <div class="stock-bar">
+                        <div
+                          class="stock-bar-fill low"
+                          style="width: 20%"
+                        ></div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="restock-badge restock-urgent">Kritis!</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>🥔 Kentang</strong></td>
+                    <td>45 kg</td>
+                    <td>100 kg</td>
+                    <td>
+                      <div class="stock-bar">
+                        <div
+                          class="stock-bar-fill high"
+                          style="width: 45%"
+                        ></div>
+                      </div>
+                    </td>
+                    <td><span class="restock-badge restock-ok">Aman</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Restock Page -->
+        <div class="page" id="page-restock">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            🔄 Rekomendasi Restock
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Sistem merekomendasikan produk yang perlu di-restock
+          </p>
+
+          <div class="chart-container">
+            <h3 style="color: var(--primary-dark); margin-bottom: 15px">
+              ⚡ Prioritas Restock
+            </h3>
+            <div id="restockList"></div>
+          </div>
+        </div>
+
+        <!-- Laporan Page (SESUAI DIAGRAM ACTIVITY) -->
+        <div class="page" id="page-laporan">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            Laporan Penjualan & Laba Rugi
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Pilih periode laporan untuk melihat data penjualan dan laba rugi
+          </p>
+
+          <!-- Step 1: Pilih Periode Laporan -->
+          <div class="report-section no-print">
+            <h3>📅 Pilih Periode Laporan</h3>
+            <div class="period-selector">
+              <div class="form-group">
+                <label>📆 Tanggal Awal</label>
+                <input type="date" id="reportStartDate" />
+              </div>
+              <div class="form-group">
+                <label>📆 Tanggal Akhir</label>
+                <input type="date" id="reportEndDate" />
+              </div>
+              <button class="btn-generate" onclick="generateReport()">
+                📊 Tampilkan Laporan
+              </button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-light)">
+              Sistem akan mengambil data penjualan sesuai periode yang dipilih,
+              menghitung total penjualan dan laba/rugi, lalu menampilkan
+              laporan.
+            </p>
+          </div>
+
+          <!-- Step 2: Hasil Laporan (ditampilkan setelah generate) -->
+          <div id="reportResult" style="display: none">
+            <!-- Header Info Laporan -->
+            <div class="report-section">
+              <div class="report-header-info">
+                <div class="info-item">
+                  <div class="label">Periode Laporan</div>
+                  <div class="value" id="reportPeriodDisplay">-</div>
+                </div>
+                <div class="info-item">
+                  <div class="label">Total Transaksi</div>
+                  <div class="value" id="reportTotalTx">0</div>
+                </div>
+                <div class="info-item">
+                  <div class="label">Tanggal Cetak</div>
+                  <div class="value" id="reportPrintDate">-</div>
+                </div>
+                <div class="info-item">
+                  <div class="label">Status</div>
+                  <div class="value" style="color: var(--success)">
+                    ✅ Selesai
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ringkasan Keuangan -->
+            <div class="revenue-grid">
+              <div class="revenue-card green">
+                <div class="rev-icon"></div>
+                <div class="rev-label">Total Penjualan</div>
+                <div class="rev-value" id="reportTotalSales">Rp 0</div>
+              </div>
+              <div class="revenue-card orange">
+                <div class="rev-icon">💸</div>
+                <div class="rev-label">Total Pengeluaran</div>
+                <div class="rev-value" id="reportTotalExpense">Rp 0</div>
+              </div>
+              <div class="revenue-card blue">
+                <div class="rev-icon">📈</div>
+                <div class="rev-label">Laba / Rugi</div>
+                <div class="rev-value" id="reportProfit">Rp 0</div>
+              </div>
+              <div class="revenue-card purple">
+                <div class="rev-icon">📊</div>
+                <div class="rev-label">Margin Keuntungan</div>
+                <div class="rev-value" id="reportMargin">0%</div>
+              </div>
+            </div>
+
+            <!-- Detail Laporan -->
+            <div class="report-grid">
+              <div class="report-card">
+                <h4>Rincian Pendapatan</h4>
+                <div id="reportIncomeDetails"></div>
+              </div>
+              <div class="report-card">
+                <h4>📤 Rincian Pengeluaran</h4>
+                <div id="reportExpenseDetails"></div>
+              </div>
+              <div class="report-card">
+                <h4>🏆 Produk Terlaris Periode Ini</h4>
+                <div id="reportTopProducts"></div>
+              </div>
+              <div class="report-card">
+                <h4>📊 Statistik Pesanan</h4>
+                <div id="reportOrderStats"></div>
+              </div>
+            </div>
+
+            <!-- Grafik Penjualan Periode -->
+            <div class="chart-container">
+              <div class="chart-header">
+                <h3>📈 Grafik Penjualan Per Periode</h3>
+              </div>
+              <div class="bar-chart" id="reportChart"></div>
+            </div>
+
+            <!-- Step 3: Opsi Cetak (Y/T) -->
+            <div class="report-section no-print" style="margin-top: 20px">
+              <h3>🖨️ Cetak Laporan</h3>
+              <p
+                style="
+                  color: var(--text-light);
+                  font-size: 0.9rem;
+                  margin-bottom: 15px;
+                "
+              >
+                Apakah Anda ingin mencetak laporan ini dalam format PDF?
+              </p>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap">
+                <button class="btn-print" onclick="printReport()">
+                  🖨️ Ya, Cetak Laporan (PDF)
+                </button>
+                <button
+                  class="btn-generate"
+                  style="background: var(--gray); color: var(--text)"
+                  onclick="finishReport()"
+                >
+                  ❌ Tidak, Selesai
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State (sebelum generate) -->
+          <div id="reportEmpty" class="chart-container">
+            <div class="empty-report">
+              <div class="empty-icon">📋</div>
+              <p
+                style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px"
+              >
+                Belum Ada Laporan
+              </p>
+              <p style="font-size: 0.9rem">
+                Silakan pilih periode tanggal di atas untuk menampilkan laporan
+                penjualan dan laba/rugi.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      // Sample Data Pesanan (untuk simulasi laporan)
+      const sampleOrders = [
+        {
+          date: "2026-06-01",
+          items: "Bayam, Tomat",
+          total: 43000,
+          payment: "COD",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-02",
+          items: "Paket Keluarga",
+          total: 85000,
+          payment: "QRIS",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-03",
+          items: "Wortel, Kentang",
+          total: 32000,
+          payment: "COD",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-05",
+          items: "Brokoli, Bayam",
+          total: 26000,
+          payment: "QRIS",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-07",
+          items: "Paket Masak",
+          total: 45000,
+          payment: "COD",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-10",
+          items: "Tomat, Cabai",
+          total: 38000,
+          payment: "QRIS",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-12",
+          items: "Paket Sehat",
+          total: 65000,
+          payment: "COD",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-15",
+          items: "Bayam, Kangkung",
+          total: 15000,
+          payment: "QRIS",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-18",
+          items: "Paket Salad",
+          total: 35000,
+          payment: "COD",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-20",
+          items: "Wortel, Timun",
+          total: 23000,
+          payment: "QRIS",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-22",
+          items: "Paket Keluarga",
+          total: 85000,
+          payment: "COD",
+          status: "Selesai",
+        },
+        {
+          date: "2026-06-23",
+          items: "Brokoli, Tomat",
+          total: 33000,
+          payment: "QRIS",
+          status: "Selesai",
+        },
+      ];
+
+      const restockData = [
+        {
+          name: "Tomat Merah",
+          icon: "🍅",
+          current: 5,
+          capacity: 50,
+          priority: "urgent",
+          reason: "Stok sangat rendah",
+        },
+        {
+          name: "Timun Segar",
+          icon: "🥒",
+          current: 8,
+          capacity: 40,
+          priority: "urgent",
+          reason: "Stok kritis",
+        },
+        {
+          name: "Wortel Baby",
+          icon: "🥕",
+          current: 30,
+          capacity: 80,
+          priority: "soon",
+          reason: "Stok menipis",
+        },
+      ];
+
+      document.addEventListener("DOMContentLoaded", function () {
+        renderRestockList();
+        setDefaultReportPeriod();
+      });
+
+      function setDefaultReportPeriod() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        document.getElementById("reportStartDate").value =
+          formatDateInput(firstDay);
+        document.getElementById("reportEndDate").value = formatDateInput(today);
+      }
+
+      function formatDateInput(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function formatDateDisplay(dateStr) {
+        const months = [
+          "Januari",
+          "Februari",
+          "Maret",
+          "April",
+          "Mei",
+          "Juni",
+          "Juli",
+          "Agustus",
+          "September",
+          "Oktober",
+          "November",
+          "Desember",
+        ];
+        const d = new Date(dateStr);
+        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      }
+
+      // GENERATE REPORT (Sesuai Diagram Activity)
+      function generateReport() {
+        const startDate = document.getElementById("reportStartDate").value;
+        const endDate = document.getElementById("reportEndDate").value;
+
+        if (!startDate || !endDate) {
+          showToast("Pilih tanggal awal dan akhir! ");
+          return;
+        }
+
+        if (new Date(startDate) > new Date(endDate)) {
+          showToast(
+            "Tanggal awal tidak boleh lebih besar dari tanggal akhir! ⚠️"
+          );
+          return;
+        }
+
+        // Step 1: Mengambil data penjualan sesuai periode
+        const filteredOrders = sampleOrders.filter((o) => {
+          const orderDate = new Date(o.date);
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          return orderDate >= start && orderDate <= end;
+        });
+
+        // Step 2: Menghitung total penjualan dan laba/rugi
+        const totalSales = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+        const totalOrders = filteredOrders.length;
+
+        // Simulasi pengeluaran (60% dari penjualan untuk COGS + operasional)
+        const cogs = Math.round(totalSales * 0.45); // Harga beli dari petani
+        const operationalCost = Math.round(totalSales * 0.1); // Gaji, listrik, dll
+        const deliveryCost = Math.round(totalSales * 0.05); // Biaya kirim
+        const totalExpense = cogs + operationalCost + deliveryCost;
+
+        // Laba/Rugi
+        const profit = totalSales - totalExpense;
+        const margin =
+          totalSales > 0 ? ((profit / totalSales) * 100).toFixed(1) : 0;
+
+        // COD vs QRIS
+        const codTotal = filteredOrders
+          .filter((o) => o.payment === "COD")
+          .reduce((sum, o) => sum + o.total, 0);
+        const qrisTotal = filteredOrders
+          .filter((o) => o.payment === "QRIS")
+          .reduce((sum, o) => sum + o.total, 0);
+
+        // Step 3: Menampilkan laporan
+        document.getElementById(
+          "reportPeriodDisplay"
+        ).textContent = `${formatDateDisplay(startDate)} - ${formatDateDisplay(
+          endDate
+        )}`;
+        document.getElementById("reportTotalTx").textContent =
+          totalOrders + " transaksi";
+        document.getElementById("reportPrintDate").textContent =
+          new Date().toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+        document.getElementById("reportTotalSales").textContent =
+          "Rp " + totalSales.toLocaleString("id-ID");
+        document.getElementById("reportTotalExpense").textContent =
+          "Rp " + totalExpense.toLocaleString("id-ID");
+
+        const profitEl = document.getElementById("reportProfit");
+        profitEl.textContent =
+          (profit >= 0 ? "Rp " : "-Rp ") +
+          Math.abs(profit).toLocaleString("id-ID");
+        profitEl.style.color = profit >= 0 ? "var(--success)" : "var(--danger)";
+
+        document.getElementById("reportMargin").textContent = margin + "%";
+
+        // Rincian Pendapatan
+        document.getElementById("reportIncomeDetails").innerHTML = `
+                <div class="report-item"><span class="ri-label">Penjualan Satuan</span><span class="ri-value">Rp ${Math.round(
+                  totalSales * 0.65
+                ).toLocaleString("id-ID")}</span></div>
+                <div class="report-item"><span class="ri-label">Penjualan Paket</span><span class="ri-value">Rp ${Math.round(
+                  totalSales * 0.25
+                ).toLocaleString("id-ID")}</span></div>
+                <div class="report-item"><span class="ri-label">Ongkos Kirim</span><span class="ri-value">Rp ${Math.round(
+                  totalSales * 0.1
+                ).toLocaleString("id-ID")}</span></div>
+                <div class="report-item"><span class="ri-label">Pembayaran COD</span><span class="ri-value">Rp ${codTotal.toLocaleString(
+                  "id-ID"
+                )}</span></div>
+                <div class="report-item"><span class="ri-label">Pembayaran QRIS</span><span class="ri-value">Rp ${qrisTotal.toLocaleString(
+                  "id-ID"
+                )}</span></div>
+                <div class="report-item total"><span class="ri-label">Total Pendapatan</span><span class="ri-value" style="color:var(--success);">Rp ${totalSales.toLocaleString(
+                  "id-ID"
+                )}</span></div>
+            `;
+
+        // Rincian Pengeluaran
+        document.getElementById("reportExpenseDetails").innerHTML = `
+                <div class="report-item"><span class="ri-label">Beli Sayur dari Petani (COGS)</span><span class="ri-value">Rp ${cogs.toLocaleString(
+                  "id-ID"
+                )}</span></div>
+                <div class="report-item"><span class="ri-label">Gaji Karyawan</span><span class="ri-value">Rp ${Math.round(
+                  operationalCost * 0.6
+                ).toLocaleString("id-ID")}</span></div>
+                <div class="report-item"><span class="ri-label">Biaya Operasional</span><span class="ri-value">Rp ${Math.round(
+                  operationalCost * 0.4
+                ).toLocaleString("id-ID")}</span></div>
+                <div class="report-item"><span class="ri-label">Biaya Pengiriman</span><span class="ri-value">Rp ${deliveryCost.toLocaleString(
+                  "id-ID"
+                )}</span></div>
+                <div class="report-item total"><span class="ri-label">Total Pengeluaran</span><span class="ri-value" style="color:var(--danger);">Rp ${totalExpense.toLocaleString(
+                  "id-ID"
+                )}</span></div>
+            `;
+
+        // Produk Terlaris
+        document.getElementById("reportTopProducts").innerHTML = `
+                <div class="report-item"><span class="ri-label">🥬 Bayam Segar</span><span class="ri-value">${Math.round(
+                  totalOrders * 0.3
+                )} unit</span></div>
+                <div class="report-item"><span class="ri-label">🍅 Tomat Merah</span><span class="ri-value">${Math.round(
+                  totalOrders * 0.25
+                )} unit</span></div>
+                <div class="report-item"><span class="ri-label">🥕 Wortel Baby</span><span class="ri-value">${Math.round(
+                  totalOrders * 0.2
+                )} unit</span></div>
+                <div class="report-item"><span class="ri-label">📦 Paket Keluarga</span><span class="ri-value">${Math.round(
+                  totalOrders * 0.15
+                )} unit</span></div>
+                <div class="report-item"><span class="ri-label">🥦 Brokoli Organik</span><span class="ri-value">${Math.round(
+                  totalOrders * 0.1
+                )} unit</span></div>
+            `;
+
+        // Statistik Pesanan
+        const completedOrders = filteredOrders.filter(
+          (o) => o.status === "Selesai"
+        ).length;
+        document.getElementById("reportOrderStats").innerHTML = `
+                <div class="report-item"><span class="ri-label">Total Pesanan</span><span class="ri-value">${totalOrders}</span></div>
+                <div class="report-item"><span class="ri-label">Pesanan Selesai</span><span class="ri-value">${completedOrders}</span></div>
+                <div class="report-item"><span class="ri-label">Rata-rata per Order</span><span class="ri-value">Rp ${
+                  totalOrders > 0
+                    ? Math.round(totalSales / totalOrders).toLocaleString(
+                        "id-ID"
+                      )
+                    : 0
+                }</span></div>
+                <div class="report-item"><span class="ri-label">Order Tertinggi</span><span class="ri-value">Rp ${
+                  filteredOrders.length > 0
+                    ? Math.max(
+                        ...filteredOrders.map((o) => o.total)
+                      ).toLocaleString("id-ID")
+                    : 0
+                }</span></div>
+                <div class="report-item"><span class="ri-label">Order Terendah</span><span class="ri-value">Rp ${
+                  filteredOrders.length > 0
+                    ? Math.min(
+                        ...filteredOrders.map((o) => o.total)
+                      ).toLocaleString("id-ID")
+                    : 0
+                }</span></div>
+            `;
+
+        // Grafik Penjualan
+        renderReportChart(filteredOrders);
+
+        // Tampilkan hasil, sembunyikan empty state
+        document.getElementById("reportResult").style.display = "block";
+        document.getElementById("reportEmpty").style.display = "none";
+
+        showToast("Laporan berhasil ditampilkan! 📊");
+
+        // Scroll ke hasil
+        setTimeout(() => {
+          document
+            .getElementById("reportResult")
+            .scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+      }
+
+      function renderReportChart(orders) {
+        const chart = document.getElementById("reportChart");
+        if (orders.length === 0) {
+          chart.innerHTML =
+            '<div style="text-align:center; width:100%; color:var(--text-light); padding:40px;">Tidak ada data untuk periode ini</div>';
+          return;
+        }
+
+        // Group by date
+        const byDate = {};
+        orders.forEach((o) => {
+          byDate[o.date] = (byDate[o.date] || 0) + o.total;
+        });
+
+        const dates = Object.keys(byDate).sort();
+        const maxVal = Math.max(...Object.values(byDate));
+
+        chart.innerHTML = dates
+          .map((d) => {
+            const val = byDate[d];
+            const height = (val / maxVal) * 100;
+            const day = new Date(d).getDate();
+            return `
+                    <div class="bar-item">
+                        <div class="bar-value">${(val / 1000).toFixed(
+                          0
+                        )}rb</div>
+                        <div class="bar" style="height: ${height}%;"></div>
+                        <div class="bar-label">${day}</div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      // CETAK LAPORAN (PDF) - Sesuai Diagram Activity
+      function printReport() {
+        const startDate = document.getElementById("reportStartDate").value;
+        const endDate = document.getElementById("reportEndDate").value;
+        document.getElementById(
+          "printPeriod"
+        ).textContent = `Periode: ${formatDateDisplay(
+          startDate
+        )} - ${formatDateDisplay(endDate)}`;
+
+        showToast("Mempersiapkan laporan PDF... 🖨️");
+
+        setTimeout(() => {
+          window.print();
+        }, 500);
+      }
+
+      // SELESAI (Tidak Cetak) - Sesuai Diagram Activity
+      function finishReport() {
+        showToast("Laporan selesai dilihat. Kembali ke dashboard... ✅");
+        setTimeout(() => {
+          showPage("dashboard");
+        }, 1000);
+      }
+
+      function renderRestockList() {
+        const container = document.getElementById("restockList");
+        if (!container) return;
+        container.innerHTML = restockData
+          .map(
+            (item, i) => `
+                <div style="display:flex; align-items:center; gap:15px; padding:18px; background:${
+                  item.priority === "urgent" ? "#ffebee" : "#fff3e0"
+                }; border-radius:12px; margin-bottom:12px; border-left:4px solid ${
+              item.priority === "urgent" ? "#e53935" : "#ff9800"
+            };">
+                    <div style="font-size:2rem;">${item.icon}</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:700; font-size:1rem;">${
+                          item.name
+                        }</div>
+                        <div style="font-size:0.85rem; color:var(--text-light);">${
+                          item.reason
+                        }</div>
+                        <div style="font-size:0.8rem; margin-top:5px;">Stok: <strong>${
+                          item.current
+                        }</strong> / ${item.capacity} (${Math.round(
+              (item.current / item.capacity) * 100
+            )}%)</div>
+                    </div>
+                    <span class="restock-badge ${
+                      item.priority === "urgent"
+                        ? "restock-urgent"
+                        : "restock-soon"
+                    }" style="font-size:0.85rem; padding:6px 14px;">
+                        ${item.priority === "urgent" ? "🔴 SEGERA" : " SEGERA"}
+                    </span>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function showPage(pageId) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document.getElementById("page-" + pageId).classList.add("active");
+
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        const navItem = document.querySelector(
+          `.nav-item[data-page="${pageId}"]`
+        );
+        if (navItem) navItem.classList.add("active");
+
+        const titles = {
+          dashboard: "Dashboard Owner",
+          pendapatan: "Pendapatan",
+          labarugi: "Laba Rugi",
+          stok: "Evaluasi Stok",
+          restock: "Rekomendasi Restock",
+          laporan: "Laporan Penjualan",
+        };
+        document.getElementById("pageTitle").textContent =
+          titles[pageId] || "Dashboard Owner";
+
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarOverlay").classList.remove("show");
+      }
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("show");
+      }
+
+      function handleLogout() {
+        if (confirm("Yakin ingin keluar?")) {
+          localStorage.removeItem("vegepack_user");
+          window.location.href = "index.html";
+        }
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+
+      document.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          this.parentElement
+            .querySelectorAll(".filter-btn")
+            .forEach((b) => b.classList.remove("active"));
+          this.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

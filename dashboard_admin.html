@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VEGEPACK - Dashboard Admin</title>
+    <style>
+      /* --- RESET & VARIABLES --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2d8a4e;
+        --primary-dark: #1a6b35;
+        --primary-light: #e8f5e9;
+        --white: #ffffff;
+        --gray: #f8faf8;
+        --gray-border: #e0e8e0;
+        --text: #2c3e2c;
+        --text-light: #6b7b6b;
+        --danger: #e53935;
+        --warning: #ff9800;
+        --success: #43a047;
+        --info: #1976d2;
+        --shadow: 0 4px 20px rgba(45, 138, 78, 0.1);
+        --shadow-lg: 0 8px 30px rgba(45, 138, 78, 0.15);
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--gray);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      /* --- SIDEBAR --- */
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 260px;
+        height: 100vh;
+        background: linear-gradient(180deg, #1a2332 0%, #2d3748 100%);
+        color: white;
+        z-index: 1000;
+        overflow-y: auto;
+        transition: transform 0.3s;
+      }
+      .sidebar-header {
+        padding: 25px 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-header .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+      }
+      .sidebar-header .logo span {
+        color: #66bb6a;
+      }
+      .sidebar-header .role-badge {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 4px 12px;
+        background: rgba(102, 187, 106, 0.2);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        color: #66bb6a;
+        font-weight: 600;
+      }
+      .nav-menu {
+        padding: 15px 0;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 25px;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+      }
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+      }
+      .nav-item.active {
+        background: rgba(102, 187, 106, 0.15);
+        color: #66bb6a;
+        border-left-color: #66bb6a;
+      }
+      .nav-item .nav-icon {
+        margin-right: 12px;
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+      }
+      .nav-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 10px 20px;
+      }
+      .nav-item.logout {
+        color: #ef5350;
+      }
+
+      /* --- MAIN CONTENT --- */
+      .main-content {
+        margin-left: 260px;
+        min-height: 100vh;
+      }
+      .topbar {
+        background: white;
+        padding: 18px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary);
+      }
+      .topbar-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .admin-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+      }
+      .page-content {
+        padding: 30px;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+        animation: fadeIn 0.4s;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* --- STATS CARDS --- */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        transition: all 0.3s;
+      }
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+      }
+      .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+      }
+      .stat-icon.blue {
+        background: #e3f2fd;
+      }
+      .stat-icon.orange {
+        background: #fff3e0;
+      }
+      .stat-icon.green {
+        background: #e8f5e9;
+      }
+      .stat-icon.purple {
+        background: #f3e5f5;
+      }
+      .stat-info .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .stat-info .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+      }
+      .stat-info .stat-change {
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 3px;
+      }
+      .stat-change.up {
+        color: var(--success);
+      }
+      .stat-change.down {
+        color: var(--danger);
+      }
+
+      /* --- TABS --- */
+      .tabs-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .tabs-header {
+        display: flex;
+        border-bottom: 2px solid var(--gray-border);
+        overflow-x: auto;
+      }
+      .tab-btn {
+        padding: 16px 24px;
+        border: none;
+        background: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-light);
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+        position: relative;
+      }
+      .tab-btn:hover {
+        color: var(--primary);
+      }
+      .tab-btn.active {
+        color: var(--primary);
+      }
+      .tab-btn.active::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 3px 3px 0 0;
+      }
+      .tab-btn .tab-count {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 2px 8px;
+        background: var(--gray);
+        border-radius: 10px;
+        font-size: 0.75rem;
+      }
+      .tab-btn.active .tab-count {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+      }
+      .tab-content {
+        padding: 20px;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* --- TABLES --- */
+      .order-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .order-table th {
+        text-align: left;
+        padding: 12px 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--gray-border);
+      }
+      .order-table td {
+        padding: 16px 15px;
+        border-bottom: 1px solid var(--gray-border);
+        font-size: 0.9rem;
+        vertical-align: middle;
+      }
+      .order-table tr:hover td {
+        background: #f1f8e9;
+      }
+      .order-customer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .customer-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+      }
+      .customer-name {
+        font-weight: 600;
+      }
+      .customer-email {
+        font-size: 0.8rem;
+        color: var(--text-light);
+      }
+      .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-block;
+      }
+      .status-baru {
+        background: #fff3e0;
+        color: #e65100;
+      }
+      .status-diproses {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      .status-dikirim {
+        background: #f3e5f5;
+        color: #7b1fa2;
+      }
+      .status-selesai {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .status-ditolak {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      /* --- BUTTONS --- */
+      .action-btns {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .btn-action {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .btn-accept {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .btn-accept:hover {
+        background: #2e7d32;
+        color: white;
+      }
+      .btn-reject {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .btn-reject:hover {
+        background: #c62828;
+        color: white;
+      }
+      .btn-ship {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      .btn-ship:hover {
+        background: #1565c0;
+        color: white;
+      }
+      .btn-complete {
+        background: #f3e5f5;
+        color: #7b1fa2;
+      }
+      .btn-complete:hover {
+        background: #7b1fa2;
+        color: white;
+      }
+      .btn-detail {
+        background: var(--gray);
+        color: var(--text);
+      }
+      .btn-detail:hover {
+        background: var(--text);
+        color: white;
+      }
+
+      /* --- COMPLAINT CARDS --- */
+      .complaint-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+        margin-bottom: 15px;
+        border-left: 4px solid var(--warning);
+      }
+      .complaint-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+      .complaint-id {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+      }
+      .complaint-date {
+        font-size: 0.8rem;
+        color: var(--text-light);
+      }
+      .complaint-customer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .complaint-text {
+        font-size: 0.9rem;
+        color: var(--text);
+        margin-bottom: 12px;
+        padding: 12px;
+        background: var(--gray);
+        border-radius: 10px;
+        line-height: 1.5;
+      }
+      .complaint-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      /* --- RESPONSIVE --- */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .menu-toggle {
+          display: block;
+        }
+        .page-content {
+          padding: 20px 15px;
+        }
+        .stats-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .order-table {
+          font-size: 0.8rem;
+        }
+        .order-table th,
+        .order-table td {
+          padding: 10px 8px;
+        }
+      }
+      @media (max-width: 480px) {
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 999;
+      }
+      .sidebar-overlay.show {
+        display: block;
+      }
+
+      /* --- TOAST & MODAL --- */
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--primary-dark);
+        color: white;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-lg);
+        z-index: 3000;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: var(--text-light);
+      }
+      .empty-state .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+      }
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-overlay.show {
+        display: flex;
+      }
+      .modal {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      .modal h3 {
+        font-size: 1.2rem;
+        color: var(--primary-dark);
+        margin-bottom: 15px;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+      }
+      .btn-modal {
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-cancel {
+        background: var(--gray);
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="toggleSidebar()"
+    ></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">VEGE<span>PACK</span></div>
+        <div class="role-badge">⚙️ ADMIN PANEL</div>
+      </div>
+      <nav class="nav-menu">
+        <div
+          class="nav-item active"
+          onclick="showPage('dashboard')"
+          data-page="dashboard"
+        >
+          <span class="nav-icon">📊</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="showPage('pesanan')" data-page="pesanan">
+          <span class="nav-icon">📦</span> Kelola Pesanan
+        </div>
+        <div class="nav-item" onclick="showPage('kurir')" data-page="kurir">
+          <span class="nav-icon">🚚</span> Kelola Kurir
+        </div>
+        <div class="nav-divider"></div>
+        <div
+          class="nav-item"
+          onclick="showPage('pengaduan')"
+          data-page="pengaduan"
+        >
+          <span class="nav-icon">📢</span> Pengaduan
+          <span
+            style="
+              margin-left: auto;
+              background: #ef5350;
+              color: white;
+              font-size: 0.7rem;
+              padding: 2px 8px;
+              border-radius: 10px;
+            "
+            id="complaintBadge"
+            >2</span
+          >
+        </div>
+        <div class="nav-item" onclick="showPage('produk')" data-page="produk">
+          <span class="nav-icon">🥬</span> Kelola Produk
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-item logout" onclick="handleLogout()">
+          <span class="nav-icon">🚪</span> Keluar
+        </div>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+          <div class="topbar-title" id="pageTitle">Dashboard Admin</div>
+        </div>
+        <div class="topbar-right">
+          <div class="admin-avatar">A</div>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <!-- DASHBOARD PAGE -->
+        <div class="page active" id="page-dashboard">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            👋 Selamat Datang, Admin!
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Berikut ringkasan pesanan hari ini
+          </p>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue">📦</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statBaru">5</div>
+                <div class="stat-label">Pesanan Baru</div>
+                <div class="stat-change up">↑ 12% dari kemarin</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange">⏳</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statDiproses">8</div>
+                <div class="stat-label">Sedang Diproses</div>
+                <div class="stat-change up">↑ 5% dari kemarin</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">🚚</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statDikirim">12</div>
+                <div class="stat-label">Dalam Pengiriman</div>
+                <div class="stat-change down">↓ 3% dari kemarin</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">✅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statSelesai">45</div>
+                <div class="stat-label">Selesai Hari Ini</div>
+                <div class="stat-change up">↑ 18% dari kemarin</div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="
+              background: white;
+              border-radius: 16px;
+              padding: 24px;
+              box-shadow: var(--shadow);
+              margin-bottom: 20px;
+            "
+          >
+            <h3
+              style="
+                font-size: 1.1rem;
+                color: var(--primary-dark);
+                margin-bottom: 15px;
+              "
+            >
+              ⚡ Aksi Cepat
+            </h3>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap">
+              <button
+                class="btn-action btn-accept"
+                style="padding: 12px 20px; font-size: 0.9rem"
+                onclick="showPage('pesanan')"
+              >
+                📦 Kelola Pesanan
+              </button>
+              <button
+                class="btn-action btn-ship"
+                style="padding: 12px 20px; font-size: 0.9rem"
+                onclick="showPage('kurir')"
+              >
+                🚚 Atur Kurir
+              </button>
+              <button
+                class="btn-action btn-detail"
+                style="padding: 12px 20px; font-size: 0.9rem"
+                onclick="showPage('pengaduan')"
+              >
+                📢 Lihat Pengaduan
+              </button>
+            </div>
+          </div>
+
+          <div class="tabs-container">
+            <div style="padding: 20px 20px 0">
+              <h3 style="font-size: 1.1rem; color: var(--primary-dark)">
+                📋 Pesanan Terbaru
+              </h3>
+            </div>
+            <div class="tab-content">
+              <div style="overflow-x: auto">
+                <table class="order-table">
+                  <thead>
+                    <tr>
+                      <th>ID Pesanan</th>
+                      <th>Pelanggan</th>
+                      <th>Items</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentOrdersBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESANAN PAGE -->
+        <div class="page" id="page-pesanan">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            📦 Kelola Pesanan
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Terima, tolak, dan kelola semua pesanan
+          </p>
+
+          <div class="tabs-container">
+            <div class="tabs-header">
+              <button class="tab-btn active" onclick="switchTab('baru')">
+                🆕 Baru <span class="tab-count" id="countBaru">5</span>
+              </button>
+              <button class="tab-btn" onclick="switchTab('diproses')">
+                ⏳ Diproses <span class="tab-count" id="countDiproses">8</span>
+              </button>
+              <button class="tab-btn" onclick="switchTab('dikirim')">
+                🚚 Dikirim <span class="tab-count" id="countDikirim">12</span>
+              </button>
+              <button class="tab-btn" onclick="switchTab('selesai')">
+                ✅ Selesai <span class="tab-count" id="countSelesai">45</span>
+              </button>
+              <button class="tab-btn" onclick="switchTab('ditolak')">
+                ❌ Ditolak <span class="tab-count" id="countDitolak">2</span>
+              </button>
+            </div>
+            <div class="tab-content">
+              <div class="tab-panel active" id="panel-baru">
+                <div style="overflow-x: auto">
+                  <table class="order-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Pelanggan</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Waktu</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bodyBaru"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-panel" id="panel-diproses">
+                <div style="overflow-x: auto">
+                  <table class="order-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Pelanggan</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bodyDiproses"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-panel" id="panel-dikirim">
+                <div style="overflow-x: auto">
+                  <table class="order-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Pelanggan</th>
+                        <th>Kurir</th>
+                        <th>Total</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bodyDikirim"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-panel" id="panel-selesai">
+                <div style="overflow-x: auto">
+                  <table class="order-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Pelanggan</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Selesai</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bodySelesai"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-panel" id="panel-ditolak">
+                <div style="overflow-x: auto">
+                  <table class="order-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Pelanggan</th>
+                        <th>Alasan</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bodyDitolak"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KURIR PAGE -->
+        <div class="page" id="page-kurir">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            🚚 Kelola Kurir
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Pilih kurir untuk pesanan yang siap kirim
+          </p>
+
+          <div class="tabs-container" style="padding: 20px">
+            <h3 style="margin-bottom: 15px; color: var(--primary-dark)">
+              📦 Pesanan Siap Kirim
+            </h3>
+            <div id="readyToShip"></div>
+          </div>
+
+          <div class="tabs-container" style="padding: 20px; margin-top: 20px">
+            <h3 style="margin-bottom: 15px; color: var(--primary-dark)">
+              👥 Daftar Kurir
+            </h3>
+            <div style="overflow-x: auto">
+              <table class="order-table">
+                <thead>
+                  <tr>
+                    <th>Nama Kurir</th>
+                    <th>No. HP</th>
+                    <th>Status</th>
+                    <th>Pesanan Aktif</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="order-customer">
+                        <div class="customer-avatar">🧑</div>
+                        <div>
+                          <div class="customer-name">Budi Santoso</div>
+                          <div class="customer-email">081234567890</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>081234567890</td>
+                    <td>
+                      <span class="status-badge status-selesai">Aktif</span>
+                    </td>
+                    <td>3 pesanan</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="order-customer">
+                        <div class="customer-avatar">👨</div>
+                        <div>
+                          <div class="customer-name">Andi Wijaya</div>
+                          <div class="customer-email">081234567891</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>081234567891</td>
+                    <td>
+                      <span class="status-badge status-selesai">Aktif</span>
+                    </td>
+                    <td>2 pesanan</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="order-customer">
+                        <div class="customer-avatar"></div>
+                        <div>
+                          <div class="customer-name">Rudi Hermawan</div>
+                          <div class="customer-email">081234567892</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>081234567892</td>
+                    <td>
+                      <span class="status-badge status-baru">Istirahat</span>
+                    </td>
+                    <td>0 pesanan</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PENGADUAN PAGE -->
+        <div class="page" id="page-pengaduan">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            📢 Pengaduan Pelanggan
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Diskusikan via WA, lalu setujui atau tolak pengaduan
+          </p>
+          <div id="complaintsList"></div>
+        </div>
+
+        <!-- PRODUK PAGE -->
+        <div class="page" id="page-produk">
+          <h1
+            style="
+              font-size: 1.5rem;
+              color: var(--primary-dark);
+              margin-bottom: 5px;
+            "
+          >
+            🥬 Kelola Produk
+          </h1>
+          <p
+            style="
+              color: var(--text-light);
+              font-size: 0.9rem;
+              margin-bottom: 25px;
+            "
+          >
+            Tambah, edit, dan kelola stok sayuran
+          </p>
+
+          <div class="tabs-container" style="padding: 20px">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+              "
+            >
+              <h3 style="color: var(--primary-dark)">Daftar Produk</h3>
+              <button class="btn-action btn-accept" style="padding: 10px 20px">
+                + Tambah Produk
+              </button>
+            </div>
+            <div style="overflow-x: auto">
+              <table class="order-table">
+                <thead>
+                  <tr>
+                    <th>Produk</th>
+                    <th>Kategori</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>🥬 Bayam Segar</strong><br /><small
+                        style="color: var(--text-light)"
+                        >per ikat (250g)</small
+                      >
+                    </td>
+                    <td>Sayur Daun</td>
+                    <td>Rp 8.000</td>
+                    <td>50 ikat</td>
+                    <td>
+                      <span class="status-badge status-selesai">Tersedia</span>
+                    </td>
+                    <td><button class="btn-action btn-detail">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>🥕 Wortel Baby</strong><br /><small
+                        style="color: var(--text-light)"
+                        >per pack (300g)</small
+                      >
+                    </td>
+                    <td>Umbi-umbian</td>
+                    <td>Rp 12.000</td>
+                    <td>30 pack</td>
+                    <td>
+                      <span class="status-badge status-selesai">Tersedia</span>
+                    </td>
+                    <td><button class="btn-action btn-detail">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>🍅 Tomat Merah</strong><br /><small
+                        style="color: var(--text-light)"
+                        >per kg</small
+                      >
+                    </td>
+                    <td>Sayur Buah</td>
+                    <td>Rp 15.000</td>
+                    <td>5 kg</td>
+                    <td>
+                      <span class="status-badge status-baru">Stok Rendah</span>
+                    </td>
+                    <td><button class="btn-action btn-detail">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>🥦 Brokoli Organik</strong><br /><small
+                        style="color: var(--text-light)"
+                        >per buah (400g)</small
+                      >
+                    </td>
+                    <td>Organik</td>
+                    <td>Rp 18.000</td>
+                    <td>25 buah</td>
+                    <td>
+                      <span class="status-badge status-selesai">Tersedia</span>
+                    </td>
+                    <td><button class="btn-action btn-detail">Edit</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div class="modal-overlay" id="detailModal">
+      <div class="modal">
+        <h3>📋 Detail Pesanan</h3>
+        <div id="detailContent"></div>
+        <div class="modal-actions">
+          <button
+            class="btn-modal btn-cancel"
+            onclick="closeModal('detailModal')"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      // --- DATA ---
+      let orders = [
+        {
+          id: "VP-001234",
+          customer: "Siti Aminah",
+          email: "siti@email.com",
+          items: "Bayam, Wortel, Tomat",
+          total: 43000,
+          status: "Baru",
+          time: "08:30",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001235",
+          customer: "Budi Prasetyo",
+          email: "budi@email.com",
+          items: "Brokoli, Selada",
+          total: 28000,
+          status: "Baru",
+          time: "09:15",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001236",
+          customer: "Dewi Lestari",
+          email: "dewi@email.com",
+          items: "Paket Keluarga",
+          total: 85000,
+          status: "Baru",
+          time: "09:45",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001237",
+          customer: "Ahmad Rizki",
+          email: "ahmad@email.com",
+          items: "Kentang, Bawang",
+          total: 34000,
+          status: "Baru",
+          time: "10:00",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001238",
+          customer: "Rina Wulandari",
+          email: "rina@email.com",
+          items: "Cabai, Tomat, Bawang",
+          total: 51000,
+          status: "Baru",
+          time: "10:30",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001220",
+          customer: "Joko Susilo",
+          email: "joko@email.com",
+          items: "Bayam, Kangkung",
+          total: 15000,
+          status: "Diproses",
+          time: "07:30",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001221",
+          customer: "Maya Sari",
+          email: "maya@email.com",
+          items: "Paket Salad",
+          total: 35000,
+          status: "Diproses",
+          time: "07:45",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001210",
+          customer: "Hendra Gunawan",
+          email: "hendra@email.com",
+          items: "Wortel, Kentang",
+          total: 32000,
+          status: "Dikirim",
+          kurir: "Budi Santoso",
+          time: "07:00",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001211",
+          customer: "Linda Permata",
+          email: "linda@email.com",
+          items: "Paket Masak",
+          total: 45000,
+          status: "Dikirim",
+          kurir: "Andi Wijaya",
+          time: "07:15",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001200",
+          customer: "Firman Hidayat",
+          email: "firman@email.com",
+          items: "Brokoli, Bayam",
+          total: 26000,
+          status: "Selesai",
+          time: "06:30",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001199",
+          customer: "Nurul Aini",
+          email: "nurul@email.com",
+          items: "Paket Sehat",
+          total: 65000,
+          status: "Selesai",
+          time: "06:00",
+          date: "22 Jun 2026",
+        },
+        {
+          id: "VP-001198",
+          customer: "Agus Setiawan",
+          email: "agus@email.com",
+          items: "Tomat busuk",
+          total: 15000,
+          status: "Ditolak",
+          reason: "Stok habis",
+          time: "06:00",
+          date: "22 Jun 2026",
+        },
+      ];
+
+      let complaints = [
+        {
+          id: "CMP-001",
+          customer: "Agus Setiawan",
+          phone: "081234567890",
+          email: "agus@email.com",
+          orderId: "VP-001198",
+          type: "Sayur tidak segar",
+          text: "Tomat yang saya terima sudah busuk dan tidak bisa digunakan. Mohon penggantian atau refund.",
+          date: "22 Jun 2026, 11:00",
+          status: "Pending",
+        },
+        {
+          id: "CMP-002",
+          customer: "Siti Nurhaliza",
+          phone: "081234567891",
+          email: "siti@email.com",
+          orderId: "VP-001220",
+          type: "Pesanan tidak lengkap",
+          text: "Saya memesan Paket Keluarga tapi yang datang hanya 4 item dari 6 item yang seharusnya.",
+          date: "22 Jun 2026, 10:30",
+          status: "Pending",
+        },
+      ];
+
+      // --- INIT ---
+      document.addEventListener("DOMContentLoaded", function () {
+        renderAllOrders();
+        renderComplaints();
+        renderReadyToShip();
+      });
+
+      // --- ORDER FUNCTIONS ---
+      function renderAllOrders() {
+        const statusMap = {
+          Baru: "baru",
+          Diproses: "diproses",
+          Dikirim: "dikirim",
+          Selesai: "selesai",
+          Ditolak: "ditolak",
+        };
+
+        const recentBody = document.getElementById("recentOrdersBody");
+        const recent = orders.slice(0, 5);
+        recentBody.innerHTML = recent
+          .map(
+            (o) => `
+                <tr>
+                    <td><strong>${o.id}</strong></td>
+                    <td><div class="order-customer"><div class="customer-avatar">👤</div><div><div class="customer-name">${
+                      o.customer
+                    }</div><div class="customer-email">${
+              o.email
+            }</div></div></div></td>
+                    <td>${o.items}</td>
+                    <td><strong>Rp ${o.total.toLocaleString(
+                      "id-ID"
+                    )}</strong></td>
+                    <td><span class="status-badge status-${
+                      statusMap[o.status]
+                    }">${o.status}</span></td>
+                    <td><div class="action-btns"><button class="btn-action btn-detail" onclick="showDetail('${
+                      o.id
+                    }')">Detail</button></div></td>
+                </tr>
+            `
+          )
+          .join("");
+
+        const groups = {};
+        orders.forEach((o) => {
+          if (!groups[o.status]) groups[o.status] = [];
+          groups[o.status].push(o);
+        });
+
+        document.getElementById("countBaru").textContent = (
+          groups["Baru"] || []
+        ).length;
+        document.getElementById("countDiproses").textContent = (
+          groups["Diproses"] || []
+        ).length;
+        document.getElementById("countDikirim").textContent = (
+          groups["Dikirim"] || []
+        ).length;
+        document.getElementById("countSelesai").textContent = (
+          groups["Selesai"] || []
+        ).length;
+        document.getElementById("countDitolak").textContent = (
+          groups["Ditolak"] || []
+        ).length;
+
+        document.getElementById("statBaru").textContent = (
+          groups["Baru"] || []
+        ).length;
+        document.getElementById("statDiproses").textContent = (
+          groups["Diproses"] || []
+        ).length;
+        document.getElementById("statDikirim").textContent = (
+          groups["Dikirim"] || []
+        ).length;
+        document.getElementById("statSelesai").textContent = (
+          groups["Selesai"] || []
+        ).length;
+
+        document.getElementById("bodyBaru").innerHTML =
+          (groups["Baru"] || [])
+            .map(
+              (o) => `
+                <tr>
+                    <td><strong>${o.id}</strong></td>
+                    <td><div class="order-customer"><div class="customer-avatar">👤</div><div><div class="customer-name">${
+                      o.customer
+                    }</div><div class="customer-email">${
+                o.email
+              }</div></div></div></td>
+                    <td>${o.items}</td>
+                    <td><strong>Rp ${o.total.toLocaleString(
+                      "id-ID"
+                    )}</strong></td>
+                    <td>${o.time}</td>
+                    <td><div class="action-btns">
+                        <button class="btn-action btn-accept" onclick="updateStatus('${
+                          o.id
+                        }', 'Diproses')">✅ Terima</button>
+                        <button class="btn-action btn-reject" onclick="rejectOrder('${
+                          o.id
+                        }')">❌ Tolak</button>
+                        <button class="btn-action btn-detail" onclick="showDetail('${
+                          o.id
+                        }')">Detail</button>
+                    </div></td>
+                </tr>
+            `
+            )
+            .join("") ||
+          '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📦</div><p>Tidak ada pesanan baru</p></div></td></tr>';
+
+        document.getElementById("bodyDiproses").innerHTML =
+          (groups["Diproses"] || [])
+            .map(
+              (o) => `
+                <tr>
+                    <td><strong>${o.id}</strong></td>
+                    <td><div class="order-customer"><div class="customer-avatar">👤</div><div><div class="customer-name">${
+                      o.customer
+                    }</div></div></div></td>
+                    <td>${o.items}</td>
+                    <td><strong>Rp ${o.total.toLocaleString(
+                      "id-ID"
+                    )}</strong></td>
+                    <td><div class="action-btns">
+                        <button class="btn-action btn-ship" onclick="updateStatus('${
+                          o.id
+                        }', 'Dikirim')">🚚 Siap Kirim</button>
+                        <button class="btn-action btn-detail" onclick="showDetail('${
+                          o.id
+                        }')">Detail</button>
+                    </div></td>
+                </tr>
+            `
+            )
+            .join("") ||
+          '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⏳</div><p>Tidak ada pesanan diproses</p></div></td></tr>';
+
+        document.getElementById("bodyDikirim").innerHTML =
+          (groups["Dikirim"] || [])
+            .map(
+              (o) => `
+                <tr>
+                    <td><strong>${o.id}</strong></td>
+                    <td><div class="order-customer"><div class="customer-avatar">👤</div><div><div class="customer-name">${
+                      o.customer
+                    }</div></div></div></td>
+                    <td>${o.kurir || "-"}</td>
+                    <td><strong>Rp ${o.total.toLocaleString(
+                      "id-ID"
+                    )}</strong></td>
+                    <td><div class="action-btns">
+                        <button class="btn-action btn-complete" onclick="updateStatus('${
+                          o.id
+                        }', 'Selesai')">✅ Selesai</button>
+                        <button class="btn-action btn-detail" onclick="showDetail('${
+                          o.id
+                        }')">Detail</button>
+                    </div></td>
+                </tr>
+            `
+            )
+            .join("") ||
+          '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🚚</div><p>Tidak ada pesanan dikirim</p></div></td></tr>';
+
+        document.getElementById("bodySelesai").innerHTML =
+          (groups["Selesai"] || [])
+            .map(
+              (o) => `
+                <tr>
+                    <td><strong>${o.id}</strong></td>
+                    <td><div class="order-customer"><div class="customer-avatar">👤</div><div><div class="customer-name">${
+                      o.customer
+                    }</div></div></div></td>
+                    <td>${o.items}</td>
+                    <td><strong>Rp ${o.total.toLocaleString(
+                      "id-ID"
+                    )}</strong></td>
+                    <td>${o.time}</td>
+                </tr>
+            `
+            )
+            .join("") ||
+          '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✅</div><p>Belum ada pesanan selesai</p></div></td></tr>';
+
+        document.getElementById("bodyDitolak").innerHTML =
+          (groups["Ditolak"] || [])
+            .map(
+              (o) => `
+                <tr>
+                    <td><strong>${o.id}</strong></td>
+                    <td><div class="order-customer"><div class="customer-avatar">👤</div><div><div class="customer-name">${
+                      o.customer
+                    }</div></div></div></td>
+                    <td>${o.reason || "-"}</td>
+                    <td><strong>Rp ${o.total.toLocaleString(
+                      "id-ID"
+                    )}</strong></td>
+                </tr>
+            `
+            )
+            .join("") ||
+          '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon"></div><p>Tidak ada pesanan ditolak</p></div></td></tr>';
+      }
+
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        event.currentTarget.classList.add("active");
+        document.getElementById("panel-" + tab).classList.add("active");
+      }
+
+      function updateStatus(id, newStatus) {
+        const order = orders.find((o) => o.id === id);
+        if (order) {
+          order.status = newStatus;
+          renderAllOrders();
+          renderReadyToShip();
+          showToast(`Pesanan ${id} status: ${newStatus} ✅`);
+        }
+      }
+
+      function rejectOrder(id) {
+        const reason = prompt("Alasan penolakan:");
+        if (reason) {
+          const order = orders.find((o) => o.id === id);
+          if (order) {
+            order.status = "Ditolak";
+            order.reason = reason;
+            renderAllOrders();
+            showToast(`Pesanan ${id} ditolak ❌`);
+          }
+        }
+      }
+
+      function assignCourier(id) {
+        const order = orders.find((o) => o.id === id);
+        if (order) {
+          order.status = "Dikirim";
+          order.kurir = "Budi Santoso";
+          renderAllOrders();
+          renderReadyToShip();
+          showToast(`Pesanan ${id} dikirim dengan kurir 🚚`);
+        }
+      }
+
+      function renderReadyToShip() {
+        const container = document.getElementById("readyToShip");
+        const ready = orders.filter((o) => o.status === "Diproses");
+        if (ready.length === 0) {
+          container.innerHTML =
+            '<div class="empty-state"><div class="empty-icon">📦</div><p>Tidak ada pesanan siap kirim</p></div>';
+          return;
+        }
+        container.innerHTML = ready
+          .map(
+            (o) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--gray); border-radius:12px; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <strong>${o.id}</strong> - ${o.customer}<br>
+                        <small style="color:var(--text-light);">${
+                          o.items
+                        } • Rp ${o.total.toLocaleString("id-ID")}</small>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <select style="padding:8px 12px; border-radius:8px; border:2px solid var(--gray-border); font-size:0.85rem;">
+                            <option>Pilih Kurir</option><option>Budi Santoso</option><option>Andi Wijaya</option><option>Rudi Hermawan</option>
+                        </select>
+                        <button class="btn-action btn-ship" onclick="assignCourier('${
+                          o.id
+                        }')">🚚 Kirim</button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function showDetail(id) {
+        const order = orders.find((o) => o.id === id);
+        if (!order) return;
+        document.getElementById("detailContent").innerHTML = `
+                <div style="margin-bottom:15px; line-height:1.6;">
+                    <strong>ID Pesanan:</strong> ${order.id}<br>
+                    <strong>Pelanggan:</strong> ${order.customer} (${
+          order.email
+        })<br>
+                    <strong>Items:</strong> ${order.items}<br>
+                    <strong>Total:</strong> Rp ${order.total.toLocaleString(
+                      "id-ID"
+                    )}<br>
+                    <strong>Status:</strong> ${order.status}<br>
+                    <strong>Waktu:</strong> ${order.date}, ${order.time}
+                    ${
+                      order.kurir
+                        ? `<br><strong>Kurir:</strong> ${order.kurir}`
+                        : ""
+                    }
+                    ${
+                      order.reason
+                        ? `<br><strong>Alasan Ditolak:</strong> ${order.reason}`
+                        : ""
+                    }
+                </div>
+            `;
+        document.getElementById("detailModal").classList.add("show");
+      }
+
+      // --- COMPLAINT FUNCTIONS (UPDATED) ---
+      function renderComplaints() {
+        const container = document.getElementById("complaintsList");
+        document.getElementById("complaintBadge").textContent =
+          complaints.length;
+
+        if (complaints.length === 0) {
+          container.innerHTML = `
+                    <div class="empty-state" style="padding:60px 20px; background:white; border-radius:16px; box-shadow:var(--shadow);">
+                        <div class="empty-icon">✅</div>
+                        <p>Tidak ada pengaduan yang perlu ditangani</p>
+                    </div>
+                `;
+          return;
+        }
+
+        container.innerHTML = complaints
+          .map(
+            (c, i) => `
+                <div class="complaint-card" style="border-left-color: ${
+                  c.type.includes("tidak segar") || c.type.includes("rusak")
+                    ? "#e53935"
+                    : "#ff9800"
+                };">
+                    <div class="complaint-header">
+                        <div>
+                            <div class="complaint-id">📢 ${c.id} - ${
+              c.type
+            }</div>
+                            <div class="complaint-date">${c.date}</div>
+                        </div>
+                        <span class="status-badge status-baru" style="background:#fff3e0; color:#e65100;">Pending Review</span>
+                    </div>
+                    <div class="complaint-customer">
+                        <div class="customer-avatar">👤</div>
+                        <div>
+                            <div class="customer-name">${c.customer}</div>
+                            <div class="customer-email">📱 ${c.phone} | 📧 ${
+              c.email || "email@customer.com"
+            }</div>
+                        </div>
+                    </div>
+                    <div class="complaint-text" style="background:#f5f5f5; padding:15px; border-radius:10px; margin:12px 0;">
+                        <strong>Keluhan:</strong><br>${c.text}
+                    </div>
+                    ${
+                      c.orderId
+                        ? `<div style="font-size:0.85rem; color:var(--text-light); margin-bottom:12px;">📦 Order ID Terkait: <strong>${c.orderId}</strong></div>`
+                        : ""
+                    }
+                    <div class="complaint-actions" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
+                        <button class="btn-action btn-ship" onclick="contactCustomer('${
+                          c.phone
+                        }', '${c.customer}')" style="padding:10px 16px;">
+                            💬 Diskusi via WA
+                        </button>
+                        <div style="flex:1;"></div>
+                        <button class="btn-action btn-reject" onclick="rejectComplaint(${i})" style="background:#ffebee; color:#c62828; border:2px solid #c62828; padding:10px 16px;">
+                            ❌ Tolak Pengaduan
+                        </button>
+                        <button class="btn-action btn-accept" onclick="approveComplaint(${i})" style="background:#e8f5e9; color:#2e7d32; border:2px solid #2e7d32; padding:10px 16px;">
+                            ✅ Setujui Pengaduan
+                        </button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function contactCustomer(phone, customerName) {
+        const message = encodeURIComponent(
+          `Halo ${customerName},\n\nKami dari VEGEPACK menerima pengaduan Anda. \n\nBolehkah kami diskusikan lebih lanjut untuk solusi terbaik?\n\nTerima kasih.`
+        );
+        window.open(
+          `https://wa.me/62${phone.slice(1)}?text=${message}`,
+          "_blank"
+        );
+      }
+
+      function approveComplaint(index) {
+        const complaint = complaints[index];
+        if (
+          confirm(
+            `Setujui pengaduan ${complaint.id}?\n\nPelanggan: ${complaint.customer}\n\nPelanggan akan mendapat kompensasi/refund.`
+          )
+        ) {
+          complaint.status = "Disetujui";
+          complaint.resolvedBy = "Admin";
+          complaint.resolvedAt = new Date().toLocaleString("id-ID");
+          complaint.resolution = "disetujui";
+
+          const message = encodeURIComponent(
+            `Halo ${complaint.customer},\n\nPengaduan Anda (${complaint.id}) telah DISETUJUI.\n\nTim kami akan segera memproses kompensasi/refund Anda.\n\nTerima kasih,\nVEGEPACK`
+          );
+          window.open(
+            `https://wa.me/62${complaint.phone.slice(1)}?text=${message}`,
+            "_blank"
+          );
+
+          complaints.splice(index, 1);
+          renderComplaints();
+          showToast(`Pengaduan ${complaint.id} DISETUJUI ✅`);
+        }
+      }
+
+      function rejectComplaint(index) {
+        const complaint = complaints[index];
+        const reason = prompt(
+          `Tolak pengaduan ${complaint.id}\n\nPelanggan: ${complaint.customer}\n\nMasukkan alasan penolakan:`
+        );
+
+        if (reason && reason.trim() !== "") {
+          complaint.status = "Ditolak";
+          complaint.resolvedBy = "Admin";
+          complaint.resolvedAt = new Date().toLocaleString("id-ID");
+          complaint.resolution = "ditolak";
+          complaint.rejectReason = reason;
+
+          const message = encodeURIComponent(
+            `Halo ${complaint.customer},\n\nMohon maaf, pengaduan Anda (${complaint.id}) tidak dapat kami setujui.\n\nAlasan: ${reason}\n\nUntuk informasi lebih lanjut, silakan hubungi kami.\n\nTerima kasih,\nVEGEPACK`
+          );
+          window.open(
+            `https://wa.me/62${complaint.phone.slice(1)}?text=${message}`,
+            "_blank"
+          );
+
+          complaints.splice(index, 1);
+          renderComplaints();
+          showToast(`Pengaduan ${complaint.id} DITOLAK ❌`);
+        } else if (reason !== null) {
+          alert("Alasan penolakan wajib diisi!");
+        }
+      }
+
+      // --- NAVIGATION & UTILS ---
+      function showPage(pageId) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document.getElementById("page-" + pageId).classList.add("active");
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        const navItem = document.querySelector(
+          `.nav-item[data-page="${pageId}"]`
+        );
+        if (navItem) navItem.classList.add("active");
+
+        const titles = {
+          dashboard: "Dashboard Admin",
+          pesanan: "Kelola Pesanan",
+          kurir: "Kelola Kurir",
+          pengaduan: "Pengaduan",
+          produk: "Kelola Produk",
+        };
+        document.getElementById("pageTitle").textContent =
+          titles[pageId] || "Dashboard Admin";
+
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarOverlay").classList.remove("show");
+      }
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("show");
+      }
+
+      function closeModal(id) {
+        document.getElementById(id).classList.remove("show");
+      }
+
+      function handleLogout() {
+        if (confirm("Yakin ingin keluar?")) {
+          localStorage.removeItem("vegepack_user");
+          window.location.href = "index.html";
+        }
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+
+      document.querySelectorAll(".modal-overlay").forEach((overlay) => {
+        overlay.addEventListener("click", function (e) {
+          if (e.target === this) this.classList.remove("show");
+        });
+      });
+    </script>
+  </body>
+</html>
